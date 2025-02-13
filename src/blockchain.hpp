@@ -1,5 +1,5 @@
-#ifndef BLOCKCHAIN_H
-#define BLOCKCHAIN_H
+#ifndef BLOCKCHAIN_HPP
+#define BLOCKCHAIN_HPP
 
 #include <string>
 #include <vector>
@@ -8,9 +8,8 @@
 #include <sstream>
 #include <filesystem>
 #include <algorithm>
-#include <openssl/sha.h>
-#include <openssl/evp.h>
-#include <openssl/rand.h>
+
+#include "crypto.hpp"
 
 namespace iotbc {
     class blockchain {
@@ -18,20 +17,15 @@ namespace iotbc {
         blockchain(const std::string &folderPath);
         ~blockchain() = default;
 
-        void addBlock(const std::vector<char> &data);
-        std::vector<char> getBlock(const std::string &uniqueId);
+        void addBlock(const std::vector<char> &data, const std::string &privateKeyString);
+        std::vector<char> getBlock(const std::string &uniqueId, const std::string &privateKeyString);
 
     private:
         const std::string folderPath;
         std::vector<std::string> blocks;
-        unsigned char key[EVP_MAX_KEY_LENGTH];
-
-        void importBlocksFromFolder();
-        void loadOrGenerateKey();
+        crypto auth;
 
         std::string calculateUniqueId(const std::vector<char> &data);
-        std::vector<char> encryptData(const std::vector<char> &data);
-        std::vector<char> decryptData(const std::vector<char> &encryptedData);
     };
 }
 

@@ -1,4 +1,4 @@
-CC = g++
+CC = g++ -g
 ifeq ($(shell uname), Darwin)
 CFLAGS = -std=c++20 -Wall -Wextra -fPIC -I$(SRC_DIR) -I/opt/homebrew/Cellar/openssl@3/3.4.1/include
 LDFLAGS = -L/opt/homebrew/Cellar/openssl@3/3.4.1/lib -lssl -lcrypto

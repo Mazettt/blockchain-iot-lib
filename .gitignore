@@ -37,3 +37,4 @@ main
 
 # Test files
 db/
+*.pem

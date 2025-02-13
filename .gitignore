@@ -34,3 +34,6 @@ main
 
 # Config files
 .vscode/
+
+# Test files
+db/

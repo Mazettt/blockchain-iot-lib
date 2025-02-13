@@ -1,9 +1,9 @@
 CC = g++
 ifeq ($(shell uname), Darwin)
-CFLAGS = -Wall -Wextra -std=c++20 -fPIC -I$(SRC_DIR) -I/opt/homebrew/Cellar/openssl@3/3.4.1/include
+CFLAGS = -std=c++20 -Wall -Wextra -fPIC -I$(SRC_DIR) -I/opt/homebrew/Cellar/openssl@3/3.4.1/include
 LDFLAGS = -L/opt/homebrew/Cellar/openssl@3/3.4.1/lib -lssl -lcrypto
 else
-CFLAGS = -Wall -Wextra -std=c++20 -fPIC -I$(SRC_DIR)
+CFLAGS = -std=c++20 -Wall -Wextra -fPIC -I$(SRC_DIR)
 LDFLAGS = -lssl -lcrypto
 endif
 SRC_DIR = src
@@ -19,7 +19,7 @@ TEST_OBJ = $(TEST_SRC:.cpp=.o)
 .PHONY: all clean
 
 all: $(LIBRARY) $(TEST_OBJ)
-	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(TEST_OBJ) -L. -lblockchain $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(TEST_OBJ) $(LDFLAGS) -L. -lblockchain
 
 $(LIBRARY): $(filter-out $(TEST_OBJ), $(OBJ))
 	$(CC) -shared -o $@ $^ $(LDFLAGS)

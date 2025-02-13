@@ -11,7 +11,7 @@ blockchain::blockchain(const std::string &folderPath):
     }
 
     loadOrGenerateKey();
-    populateBlocks();
+    importBlocksFromFolder();
 }
 
 void blockchain::addBlock(const std::vector<char> &data) {
@@ -43,7 +43,7 @@ std::vector<char> blockchain::getBlock(const std::string &uniqueId) {
     }
 }
 
-void blockchain::populateBlocks() {
+void blockchain::importBlocksFromFolder() {
     for (const auto &entry : fs::directory_iterator(folderPath)) {
         if (entry.is_regular_file()) {
             blocks.push_back(entry.path().filename().string());

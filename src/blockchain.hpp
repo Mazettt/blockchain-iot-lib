@@ -6,6 +6,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <filesystem>
+#include <algorithm>
 #include <openssl/sha.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
@@ -24,7 +26,7 @@ namespace iotbc {
         std::vector<std::string> blocks;
         unsigned char key[EVP_MAX_KEY_LENGTH];
 
-        void populateBlocks();
+        void importBlocksFromFolder();
         void loadOrGenerateKey();
 
         std::string calculateUniqueId(const std::vector<char> &data);

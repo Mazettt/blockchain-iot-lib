@@ -18,6 +18,7 @@ namespace iotbc {
         ~blockchain() = default;
 
         void addBlock(const std::vector<char> &data, const std::string &privateKeyString);
+        void addBlock(const std::string &data, const std::string &privateKeyString);
         std::vector<char> getBlock(const std::string &uniqueId, const std::string &privateKeyString);
 
     private:

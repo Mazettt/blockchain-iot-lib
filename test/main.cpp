@@ -11,12 +11,8 @@ std::string loadFile(const std::string &path) {
     return res;
 }
 
-std::vector<char> getRandLetters(size_t size) {
-    std::vector<char> res(size);
-    for (auto &c : res) {
-        c = 'a' + rand() % 26;
-    }
-    return res;
+std::string getRandomString() {
+    return "Test " + std::to_string(rand() % 100);
 }
 
 int main(int ac, char **av) {
@@ -30,8 +26,8 @@ int main(int ac, char **av) {
 
     try {
         std::string privateKeyString = loadFile("./private_key1.pem");
-        bc.addBlock(getRandLetters(10), privateKeyString);
-        std::vector<char> data = bc.getBlock("40a71e1cb62ab0eb08052ac78d31b9431c36ff246ad45a922b2785bbf14", privateKeyString);
+        bc.addBlock(getRandomString(), privateKeyString);
+        std::vector<char> data = bc.getBlock("a7cb0e4a4f443fdbd2c617d1f659aa9d819dc9f7d618164652dfd6f7ef5c0", privateKeyString);
         for (const auto &c : data) { std::cout << c; } std::cout << std::endl;
     } catch (const std::exception &e) {
         std::cerr << "ERROR: " << e.what() << std::endl;

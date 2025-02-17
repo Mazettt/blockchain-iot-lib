@@ -4,7 +4,7 @@ using namespace iotbc;
 namespace fs = std::filesystem;
 
 blockchain::blockchain(const std::string &folderPath):
-    folderPath(folderPath), auth(folderPath)
+    folderPath(folderPath), auth(folderPath + "/keys")
 {
     if (!fs::exists(folderPath)) {
         fs::create_directory(folderPath);
@@ -20,22 +20,24 @@ blockchain::blockchain(const std::string &folderPath):
 }
 
 void blockchain::addBlock(const std::vector<char> &data, const std::string &privateKeyString) {
-    std::optional<std::string> publicKeyString = auth.authenticate(privateKeyString);
-    if (!publicKeyString) {
+    if (!auth.authenticate(privateKeyString)) {
         throw std::runtime_error("Not authorized");
     }
 
     std::string uniqueId = calculateUniqueId(data);
     std::ofstream outFile(folderPath + "/" + uniqueId, std::ios::binary);
     if (outFile.is_open()) {
-        std::vector<char> encryptedData = crypto::encryptData(data, *publicKeyString);
-        outFile.write(encryptedData.data(), encryptedData.size());
+        outFile.write(data.data(), data.size());
         outFile.close();
         blocks.push_back(uniqueId);
         std::cout << "Block added with ID: '" << uniqueId << "'" << std::endl;
     } else {
         throw std::runtime_error("Unable to open file to write block");
     }
+}
+
+void blockchain::addBlock(const std::string &data, const std::string &privateKeyString) {
+    addBlock(std::vector<char>(data.begin(), data.end()), privateKeyString);
 }
 
 std::vector<char> blockchain::getBlock(const std::string &uniqueId, const std::string &privateKeyString) {
@@ -49,9 +51,9 @@ std::vector<char> blockchain::getBlock(const std::string &uniqueId, const std::s
 
     std::ifstream inFile(folderPath + "/" + uniqueId, std::ios::binary);
     if (inFile.is_open()) {
-        std::vector<char> encryptedData{std::istreambuf_iterator<char>(inFile), std::istreambuf_iterator<char>()};
+        std::vector<char> data{std::istreambuf_iterator<char>(inFile), std::istreambuf_iterator<char>()};
         inFile.close();
-        return crypto::decryptData(encryptedData, privateKeyString);
+        return data;
     } else {
         throw std::runtime_error("Unable to open file to read block");
     }

@@ -31,6 +31,7 @@
 *.out
 *.app
 main
+run_unit_tests
 
 # Config files
 .vscode/
@@ -38,3 +39,5 @@ main
 # Test files
 db/
 *.pem
+private_key
+blocks

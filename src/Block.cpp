@@ -1,9 +1,29 @@
 #include <limits>
+#include <bit>
 
 #include <Block.hpp>
 #include <Exceptions.hpp>
 
 namespace iotbc {
+    static bool hasLeadingZeroBits(const Hash& hash, int difficulty) {
+        int zeroBits = 0;
+
+        for (unsigned char byte : hash) {
+            if (byte == 0) {
+                zeroBits += 8;
+            } else {
+                zeroBits += std::countl_zero(byte);
+                break;
+            }
+
+            if (zeroBits >= difficulty) {
+                return true;
+            }
+        }
+
+        return zeroBits >= difficulty;
+    }
+    
     static Hash hash_two_hashes(const Hash &a, const Hash &b) {
         EVP_MD_CTX *ctx = EVP_MD_CTX_new();
 
@@ -101,15 +121,7 @@ namespace iotbc {
         while (nonce < std::numeric_limits<Nonce>::max()) {
             Hash computedHash = blockHash();
 
-            bool valid = true;
-
-            // TODO: difficulty is invalid, it is based on the number of leading zeros on the hex representation of the hash
-            for (int i = 0; i < difficulty; i++) {
-                if (computedHash[i] != 0) {
-                    valid = false;
-                    break;
-                }
-            }
+            bool valid = hasLeadingZeroBits(computedHash, difficulty);
 
             if (valid) {
                 return;

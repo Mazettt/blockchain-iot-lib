@@ -73,7 +73,7 @@ int main(int ac, char **av) {
         return 0;
     }
 
-    int difficulty = 2;
+    int difficulty = 12;
 
     iotbc::PrivateKey key = readPKeyFromFile("./private_key");
 

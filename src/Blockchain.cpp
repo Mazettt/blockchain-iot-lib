@@ -19,7 +19,7 @@ namespace iotbc {
         }
     };
 
-    Blockchain::Blockchain() : chain() {
+    Blockchain::Blockchain() : chain(), layers() {
     }
 
     void Blockchain::loadExistingBlocks(const std::string &folderPath) {
@@ -74,6 +74,12 @@ namespace iotbc {
 
         if (!existingBlocks.empty()) {
             std::cerr << "Warning: Some blocks were found but not part of the chain" << std::endl;
+        }
+
+        for (const auto &block : chain) {
+            for (const auto &layer : layers) {
+                layer->processBlock(block);
+            }
         }
     }
 
@@ -137,6 +143,10 @@ namespace iotbc {
             if (block.prevHash != chain.back().blockHash()) {
                 throw InvalidBlock("Block prevHash does not match the last block's hash");
             }
+        }
+
+        for (const auto &layer : layers) {
+            layer->processBlock(block);
         }
 
         chain.push_back(block);

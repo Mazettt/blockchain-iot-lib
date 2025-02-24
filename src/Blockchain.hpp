@@ -3,16 +3,19 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <memory>
 #include <openssl/sha.h>
 #include <secp256k1.h>
 
 #include <Block.hpp>
 #include <Types.hpp>
+#include <ILayer.hpp>
 
 namespace iotbc {
     class Blockchain {
     public:
         std::vector<Block> chain;
+        std::vector<std::shared_ptr<ILayer>> layers;
 
         Blockchain();
 
@@ -44,5 +47,12 @@ namespace iotbc {
         /// @param block The block to add
         /// @throws iotbc::InvalidBlock if the block is invalid
         void addBlock(const Block &block);
+
+        /// @brief Adds a new layer to the blockchain
+        /// @param layer The layer to add
+        inline void addLayer(const std::shared_ptr<ILayer> &layer)
+        {
+            layers.emplace_back(layer);
+        }
     };
 }

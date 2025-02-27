@@ -1,7 +1,7 @@
 CC = g++ -g
 ifeq ($(shell uname), Darwin)
-CFLAGS = -std=c++20 -Wall -Wextra -fPIC -I$(SRC_DIR) -I/opt/homebrew/Cellar/openssl@3/3.4.1/include
-LDFLAGS = -L/opt/homebrew/Cellar/openssl@3/3.4.1/lib -lssl -lcrypto -lsecp256k1
+CFLAGS = -std=c++20 -Wall -Wextra -fPIC -I$(SRC_DIR) -I/opt/homebrew/Cellar/openssl@3/3.4.1/include -I/opt/homebrew/Cellar/secp256k1/0.6.0/include
+LDFLAGS = -L/opt/homebrew/Cellar/openssl@3/3.4.1/lib -L/opt/homebrew/Cellar/secp256k1/0.6.0/lib -lssl -lcrypto -lsecp256k1
 GTEST = /usr/lib/libgtest.a
 # TODO: gtest path may be incorrect on macos
 else

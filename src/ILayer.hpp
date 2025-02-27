@@ -9,6 +9,8 @@ namespace iotbc {
     /// They are run every time a block is added to the blockchain
     class ILayer {
         public:
+            virtual ~ILayer() = default;
+
             /// @brief Function called for every block in the blockchain
             /// @param block The block to process
             virtual void processBlock(const Block &block) = 0;

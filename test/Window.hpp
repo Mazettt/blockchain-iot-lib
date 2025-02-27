@@ -4,8 +4,8 @@
 
 class Window: public ASensor {
     public:
-        Window(const std::string &id, const std::string &accessToken):
-            ASensor(id, accessToken)
+        Window(const std::string &id):
+            ASensor(id)
         {}
         virtual ~Window() = default;
 

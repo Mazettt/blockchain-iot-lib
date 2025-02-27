@@ -10,5 +10,4 @@ class ISensor {
         virtual ~ISensor() = default;
         virtual json genData() const = 0;
         virtual std::string getId() const = 0;
-        virtual std::string getAccessToken() const = 0;
 };

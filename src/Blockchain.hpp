@@ -20,16 +20,16 @@ namespace iotbc {
         Blockchain();
 
         /// @brief Loads existing blocks from a folder
-        /// @param folderPath 
+        /// @param folderPath
         /// @throws iotbc::IoError if there is an issue reading the folder
         /// @throws iotbc::InvalidBlockchainSave if the blockchain is invalid
         void loadExistingBlocks(const std::string &folderPath);
 
         /// @brief Verifies the existing chain has valid blocks connected together
         /// and each block has properly signed transactions
-        /// @throws iotbc::InvalidBlockchain if the chain is invalid
+        /// @throws iotbc::InvalidBlockchainSave if the chain is invalid
         /// @note This function does not verify the genesis block. Nodes should agree on it before hand
-        void verifyExistingChain();
+        void verifyExistingChain() const;
 
         /// @brief Saves the blockchain to a folder
         /// @param folderPath The folder to save the blockchain to

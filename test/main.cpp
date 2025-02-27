@@ -1,5 +1,6 @@
 #include <Block.hpp>
 #include <Blockchain.hpp>
+#include <Exceptions.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -8,6 +9,7 @@
 
 #include "GuiLayer.hpp"
 
+#include "ConfigLoader.hpp"
 #include "ISensor.hpp"
 #include "Door.hpp"
 #include "Occupancy.hpp"
@@ -80,38 +82,19 @@ void printCurrentChain(const iotbc::Blockchain &chain) {
     }
 }
 
-std::vector<std::unique_ptr<ISensor>> loadSensors(const std::string &path) {
-    std::ifstream configFile(path);
-    if (!configFile) {
-        throw std::runtime_error("Unable to open sensors configuration file.");
+void sendBlockchainAttributes(const json &attributes, const iotbc::Blockchain &chain) {
+    bool valid = true;
+    try {
+        chain.verifyExistingChain();
+    } catch(const iotbc::InvalidBlockchainSave &e) {
+        valid = false;
     }
 
-    nlohmann::json config;
-    configFile >> config;
-
-    std::vector<std::unique_ptr<ISensor>> res;
-    for (const auto &c : config) {
-        std::string type = c["type"];
-        std::string id = c["id"];
-        std::string accessToken = c["access_token"];
-
-        if (type == "Door") {
-            res.push_back(std::make_unique<Door>(id, accessToken));
-        } else if (type == "Occupancy") {
-            res.push_back(std::make_unique<Occupancy>(id, accessToken));
-        } else if (type == "Potentiometer") {
-            res.push_back(std::make_unique<Potentiometer>(id, accessToken));
-        } else if (type == "Thermostat") {
-            res.push_back(std::make_unique<Thermostat>(id, accessToken));
-        } else if (type == "Window") {
-            res.push_back(std::make_unique<Window>(id, accessToken));
-        } else {
-            throw std::runtime_error("Unknown sensor type: " + type);
-        }
-
-        std::cout << "Loaded sensor of type " << type << ": " << id << std::endl;
-    }
-    return res;
+    json data = {
+        {"size", chain.chain.size()},
+        {"valid", valid}
+    };
+    std::system(("curl -X POST http://localhost:8080/api/v1/" + std::string(attributes["access_token"]) + "/attributes --header Content-Type:application/json --data \"" + data.dump() + "\"").c_str());
 }
 
 int main(int ac, char **av) {
@@ -123,13 +106,15 @@ int main(int ac, char **av) {
 
     int difficulty = 12;
 
-    std::vector<std::unique_ptr<ISensor>> sensors = loadSensors("config.json");
+    ConfigLoader loader("config.json");
+    auto sensors = loader.getSensors();
+    json attributes = loader.getAttributes();
     iotbc::PrivateKey key = readPKeyFromFile("./private_key");
 
     iotbc::Blockchain chain;
     chain.loadExistingBlocks("./blocks");
     chain.verifyExistingChain();
-    chain.addLayer(std::make_unique<GuiLayer>());
+    chain.addLayer(std::make_unique<GuiLayer>("config.json"));
 
     // printCurrentChain(chain);
 
@@ -149,6 +134,8 @@ int main(int ac, char **av) {
         printBlock(block);
         std::cout << std::endl;
         chain.saveBlocks("./blocks");
+
+        sendBlockchainAttributes(attributes, chain);
 
         std::this_thread::sleep_for(std::chrono::seconds(5));
     }

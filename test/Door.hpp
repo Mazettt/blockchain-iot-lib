@@ -4,8 +4,8 @@
 
 class Door: public ASensor {
     public:
-        Door(const std::string &id, const std::string &accessToken):
-            ASensor(id, accessToken)
+        Door(const std::string &id):
+            ASensor(id)
         {}
         virtual ~Door() = default;
 

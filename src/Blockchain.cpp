@@ -41,7 +41,7 @@ namespace iotbc {
                 std::vector<unsigned char> data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
                 Block block = Block::deserialize(data);
-                
+
                 if (block.prevHash == NULL_HASH) {
                     if (genesisBlock.has_value()) {
                         throw InvalidBlockchainSave("Cannot have multiple genesis blocks");
@@ -83,11 +83,11 @@ namespace iotbc {
         }
     }
 
-    void Blockchain::verifyExistingChain() {
+    void Blockchain::verifyExistingChain() const {
         if (chain.empty()) {
             return;
         }
-        
+
         chain[0].verifyTransactions();
 
         for (size_t i = 1; i < chain.size(); i++) {

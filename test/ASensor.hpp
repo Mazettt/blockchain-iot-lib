@@ -5,9 +5,8 @@
 
 class ASensor: public ISensor {
 public:
-    ASensor(const std::string &id, const std::string &accessToken):
-        id(id),
-        accessToken(accessToken)
+    ASensor(const std::string &id):
+        id(id)
     {}
     virtual ~ASensor() = default;
 
@@ -15,17 +14,12 @@ public:
         json data = genDataImpl();
         return {
             {"id", getId()},
-            {"accessToken", getAccessToken()},
             {"data", data}
         };
     }
 
     virtual std::string getId() const override final {
         return id;
-    }
-
-    virtual std::string getAccessToken() const override final {
-        return accessToken;
     }
 
 protected:
@@ -54,5 +48,4 @@ protected:
 
 private:
     const std::string id;
-    const std::string accessToken;
 };

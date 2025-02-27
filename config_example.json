@@ -1,27 +1,33 @@
-[
-    {
-        "type": "Door",
+{
+    "attributes": {
         "id": "",
         "access_token": ""
     },
-    {
-        "type": "Occupancy",
-        "id": "",
-        "access_token": ""
-    },
-    {
-        "type": "Potentiometer",
-        "id": "",
-        "access_token": ""
-    },
-    {
-        "type": "Thermostat",
-        "id": "",
-        "access_token": ""
-    },
-    {
-        "type": "Window",
-        "id": "",
-        "access_token": ""
-    }
-]
+    "telemetry": [
+        {
+            "type": "Door",
+            "id": "",
+            "access_token": ""
+        },
+        {
+            "type": "Occupancy",
+            "id": "",
+            "access_token": ""
+        },
+        {
+            "type": "Potentiometer",
+            "id": "",
+            "access_token": ""
+        },
+        {
+            "type": "Thermostat",
+            "id": "",
+            "access_token": ""
+        },
+        {
+            "type": "Window",
+            "id": "",
+            "access_token": ""
+        }
+    ]
+}

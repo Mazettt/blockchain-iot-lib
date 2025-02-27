@@ -4,8 +4,8 @@
 
 class Potentiometer: public ASensor {
     public:
-        Potentiometer(const std::string &id, const std::string &accessToken):
-            ASensor(id, accessToken)
+        Potentiometer(const std::string &id):
+            ASensor(id)
         {}
         virtual ~Potentiometer() = default;
 

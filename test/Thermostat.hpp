@@ -4,8 +4,8 @@
 
 class Thermostat: public ASensor {
     public:
-        Thermostat(const std::string &id, const std::string &accessToken):
-            ASensor(id, accessToken)
+        Thermostat(const std::string &id):
+            ASensor(id)
         {}
         virtual ~Thermostat() = default;
 

@@ -4,8 +4,8 @@
 
 class Occupancy: public ASensor {
     public:
-        Occupancy(const std::string &id, const std::string &accessToken):
-            ASensor(id, accessToken)
+        Occupancy(const std::string &id):
+            ASensor(id)
         {}
         virtual ~Occupancy() = default;
 

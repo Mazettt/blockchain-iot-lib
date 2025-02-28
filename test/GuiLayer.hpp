@@ -5,8 +5,10 @@
 #include <Block.hpp>
 #include <ILayer.hpp>
 #include <json.hpp>
+#include "MqttClient.hpp"
 
 using json = nlohmann::json;
+using sensorId = std::string;
 
 class GuiLayer: public iotbc::ILayer {
 public:
@@ -18,19 +20,17 @@ public:
         json config;
         configFile >> config;
         for (const auto &c : config["telemetry"]) {
-            sensors[c["id"]] = c["access_token"];
+            sensors.emplace(c["id"], std::make_unique<MqttClient>("tcp://localhost:1883", c["id"], c["access_token"]));
         }
     }
 
     virtual void processBlock(const iotbc::Block &block) override final {
         for (const auto &tx : block.transactions) {
             json blockData = json::parse(tx.data.begin(), tx.data.end());
-            std::string accessToken = sensors[blockData["id"]];
-            std::string data = blockData["data"].dump();
-            std::system(("curl -X POST http://localhost:8080/api/v1/" + accessToken + "/telemetry --header Content-Type:application/json --data \"" + data + "\"").c_str());
+            sensors.at(blockData["id"])->sendTelemetry(blockData["data"]);
         }
     }
 
 private:
-    std::unordered_map<std::string, std::string> sensors;
+    std::unordered_map<sensorId, std::unique_ptr<MqttClient>> sensors;
 };

@@ -8,6 +8,7 @@
 #include <thread>
 
 #include "GuiLayer.hpp"
+#include "MqttClient.hpp"
 
 #include "ConfigLoader.hpp"
 #include "ISensor.hpp"
@@ -82,7 +83,7 @@ void printCurrentChain(const iotbc::Blockchain &chain) {
     }
 }
 
-void sendBlockchainAttributes(const json &attributes, const iotbc::Blockchain &chain) {
+void sendBlockchainAttributes(MqttClient &client, const iotbc::Blockchain &chain) {
     bool valid = true;
     try {
         chain.verifyExistingChain();
@@ -94,7 +95,8 @@ void sendBlockchainAttributes(const json &attributes, const iotbc::Blockchain &c
         {"size", chain.chain.size()},
         {"valid", valid}
     };
-    std::system(("curl -X POST http://localhost:8080/api/v1/" + std::string(attributes["access_token"]) + "/attributes --header Content-Type:application/json --data \"" + data.dump() + "\"").c_str());
+
+    client.sendAttributes(data);
 }
 
 int main(int ac, char **av) {
@@ -117,6 +119,7 @@ int main(int ac, char **av) {
     chain.addLayer(std::make_unique<GuiLayer>("config.json"));
 
     // printCurrentChain(chain);
+    MqttClient client("tcp://localhost:1883", attributes["id"], attributes["access_token"]);
 
     while (true) {
         iotbc::Block block(chain.chain.empty() ? iotbc::NULL_HASH : chain.chain.back().blockHash());
@@ -132,11 +135,11 @@ int main(int ac, char **av) {
         chain.addBlock(block);
         std::cout << "Added block to chain:" << std::endl;
         printBlock(block);
-        std::cout << std::endl;
         chain.saveBlocks("./blocks");
 
-        sendBlockchainAttributes(attributes, chain);
+        sendBlockchainAttributes(client, chain);
 
+        std::cout << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(5));
     }
 

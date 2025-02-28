@@ -11,8 +11,6 @@ class Occupancy: public ASensor {
 
     protected:
         virtual json genDataImpl() const override {
-            json data;
-            data["detected"] = getRandomBool();
-            return data;
+            return json{{ "detected", getRandomBool() }};
         }
 };

@@ -11,9 +11,6 @@ class Window: public ASensor {
 
     protected:
         virtual json genDataImpl() const override {
-            json data;
-            data["open"] = getRandomBool();
-            // data["angle"] = getRandomNumber(0, 180);
-            return data;
+            return json{{ "open", getRandomBool() }};
         }
 };

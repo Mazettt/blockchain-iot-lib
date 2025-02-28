@@ -11,8 +11,6 @@ class Potentiometer: public ASensor {
 
     protected:
         virtual json genDataImpl() const override {
-            json data;
-            data["state"] = getRandomNumber(0, 100);
-            return data;
+            return json{{ "state", getRandomNumber(0, 100) }};
         }
 };

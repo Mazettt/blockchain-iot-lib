@@ -11,10 +11,10 @@ class Thermostat: public ASensor {
 
     protected:
         virtual json genDataImpl() const override {
-            json data;
-            data["temperature"] = getRandomNumber(20, 30);
-            data["humidity"] = getRandomNumber(60, 70);
-            data["pressure"] = getRandomNumber(950, 1050);
-            return data;
+            return json{
+                { "temperature", getRandomNumber(20, 30) },
+                { "humidity", getRandomNumber(60, 70) },
+                { "pressure", getRandomNumber(950, 1050) }
+            };
         }
 };

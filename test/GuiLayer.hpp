@@ -5,32 +5,17 @@
 #include <Block.hpp>
 #include <ILayer.hpp>
 #include <json.hpp>
-#include "MqttClient.hpp"
+#include "ThingsBoardClient.hpp"
 
 using json = nlohmann::json;
 using sensorId = std::string;
+using clientPtr = std::unique_ptr<ThingsBoardClient>;
 
 class GuiLayer: public iotbc::ILayer {
 public:
-    GuiLayer(const std::string &configPath) {
-        std::ifstream configFile(configPath);
-        if (!configFile) {
-            throw std::runtime_error("Unable to open sensors configuration file.");
-        }
-        json config;
-        configFile >> config;
-        for (const auto &c : config["telemetry"]) {
-            sensors.emplace(c["id"], std::make_unique<MqttClient>("tcp://localhost:1883", c["id"], c["access_token"]));
-        }
-    }
-
-    virtual void processBlock(const iotbc::Block &block) override final {
-        for (const auto &tx : block.transactions) {
-            json blockData = json::parse(tx.data.begin(), tx.data.end());
-            sensors.at(blockData["id"])->sendTelemetry(blockData["data"]);
-        }
-    }
+    GuiLayer(const std::string &configPath);
+    virtual void processBlock(const iotbc::Block &block) override final;
 
 private:
-    std::unordered_map<sensorId, std::unique_ptr<MqttClient>> sensors;
+    std::unordered_map<sensorId, clientPtr> sensors;
 };

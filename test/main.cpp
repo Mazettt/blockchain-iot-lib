@@ -8,15 +8,15 @@
 #include <thread>
 
 #include "GuiLayer.hpp"
-#include "MqttClient.hpp"
-
+#include "ThingsBoardClient.hpp"
 #include "ConfigLoader.hpp"
-#include "ISensor.hpp"
-#include "Door.hpp"
-#include "Occupancy.hpp"
-#include "Potentiometer.hpp"
-#include "Thermostat.hpp"
-#include "Window.hpp"
+
+#include "sensors/ISensor.hpp"
+#include "sensors/Door.hpp"
+#include "sensors/Occupancy.hpp"
+#include "sensors/Potentiometer.hpp"
+#include "sensors/Thermostat.hpp"
+#include "sensors/Window.hpp"
 
 // For testing environments generating a pseudo-random private key is okay
 iotbc::PrivateKey generatePseudoRandomPrivateKey() {
@@ -83,7 +83,7 @@ void printCurrentChain(const iotbc::Blockchain &chain) {
     }
 }
 
-void sendBlockchainAttributes(MqttClient &client, const iotbc::Blockchain &chain) {
+void sendBlockchainAttributes(ThingsBoardClient &client, const iotbc::Blockchain &chain) {
     bool valid = true;
     try {
         chain.verifyExistingChain();
@@ -119,7 +119,7 @@ int main(int ac, char **av) {
     chain.addLayer(std::make_unique<GuiLayer>("config.json"));
 
     // printCurrentChain(chain);
-    MqttClient client("tcp://localhost:1883", attributes["id"], attributes["access_token"]);
+    ThingsBoardClient client("tcp://localhost:1883", attributes["id"], attributes["access_token"]);
 
     while (true) {
         iotbc::Block block(chain.chain.empty() ? iotbc::NULL_HASH : chain.chain.back().blockHash());

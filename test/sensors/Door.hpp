@@ -11,8 +11,6 @@ class Door: public ASensor {
 
     protected:
         virtual json genDataImpl() const override {
-            json data;
-            data["open"] = getRandomBool();
-            return data;
+            return json{{ "open", getRandomBool() }};
         }
 };

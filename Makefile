@@ -13,19 +13,23 @@ endif
 SRC_DIR = src
 TEST_DIR = test
 UNIT_TEST_DIR = unit_tests
+METRICS_DIR = metrics
 LIBRARY = libblockchain.so
 EXECUTABLE = main
 UNIT_TEST_EXEC = run_unit_tests
+METRICS_EXEC = run_metrics
 
 SRC = $(shell find $(SRC_DIR) -type f -name '*.cpp')
 TEST_SRC = $(shell find $(TEST_DIR) -type f -name '*.cpp')
 UNIT_TEST_SRC = $(shell find $(UNIT_TEST_DIR) -type f -name '*.cpp')
+METRICS_SRC = $(shell find $(METRICS_DIR) -type f -name '*.cpp')
 
 OBJ = $(SRC:.cpp=.o)
 TEST_OBJ = $(TEST_SRC:.cpp=.o)
 UNIT_TEST_OBJ = $(UNIT_TEST_SRC:.cpp=.o)
+METRICS_OBJ = $(METRICS_SRC:.cpp=.o)
 
-.PHONY: all clean unit_tests
+.PHONY: all clean unit_tests metrics
 
 all: $(LIBRARY) $(TEST_OBJ)
 	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(TEST_OBJ) $(LDFLAGS) -L. -lblockchain
@@ -42,11 +46,17 @@ $(TEST_DIR)/%.o: $(TEST_DIR)/%.cpp
 $(UNIT_TEST_DIR)/%.o: $(UNIT_TEST_DIR)/%.cpp
 	$(CC) $(CFLAGS) -I./unit_tests -c $< -o $@
 
+$(METRICS_DIR)/%.o: $(METRICS_DIR)/%.cpp
+	$(CC) $(CFLAGS) -I./metrics -c $< -o $@
+
 unit_tests: LDFLAGS += -lgtest -lgtest_main -lpthread $(GTEST)
 unit_tests: $(LIBRARY) $(UNIT_TEST_OBJ)
 	$(CC) $(CFLAGS) -o $(UNIT_TEST_EXEC) $(UNIT_TEST_OBJ) $(LDFLAGS) -L. -lblockchain
 
+metrics: $(LIBRARY) $(METRICS_OBJ)
+	$(CC) $(CFLAGS) -o $(METRICS_EXEC) $(METRICS_OBJ) $(LDFLAGS) -L. -lblockchain
+
 clean:
-	rm -f $(OBJ) $(TEST_OBJ) $(UNIT_TEST_OBJ) $(EXECUTABLE) $(LIBRARY) $(UNIT_TEST_EXEC)
+	rm -f $(OBJ) $(TEST_OBJ) $(UNIT_TEST_OBJ) $(METRICS_OBJ) $(EXECUTABLE) $(LIBRARY) $(UNIT_TEST_EXEC) $(METRICS_EXEC)
 
 re: clean all

@@ -11,7 +11,7 @@ GTEST = /usr/lib/libgtest.a
 endif
 
 SRC_DIR = src
-TEST_DIR = test
+SIMULATION_DIR = simulation
 UNIT_TEST_DIR = unit_tests
 METRICS_DIR = metrics
 LIBRARY = libblockchain.so
@@ -20,27 +20,27 @@ UNIT_TEST_EXEC = run_unit_tests
 METRICS_EXEC = run_metrics
 
 SRC = $(shell find $(SRC_DIR) -type f -name '*.cpp')
-TEST_SRC = $(shell find $(TEST_DIR) -type f -name '*.cpp')
+SIMULATION_SRC = $(shell find $(SIMULATION_DIR) -type f -name '*.cpp')
 UNIT_TEST_SRC = $(shell find $(UNIT_TEST_DIR) -type f -name '*.cpp')
 METRICS_SRC = $(shell find $(METRICS_DIR) -type f -name '*.cpp')
 
 OBJ = $(SRC:.cpp=.o)
-TEST_OBJ = $(TEST_SRC:.cpp=.o)
+SIMULATION_OBJ = $(SIMULATION_SRC:.cpp=.o)
 UNIT_TEST_OBJ = $(UNIT_TEST_SRC:.cpp=.o)
 METRICS_OBJ = $(METRICS_SRC:.cpp=.o)
 
-.PHONY: all clean unit_tests metrics
+.PHONY: all clean unit_tests metrics simulation
 
-all: $(LIBRARY) $(TEST_OBJ)
-	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(TEST_OBJ) $(LDFLAGS) -L. -lblockchain
+all: $(LIBRARY) $(SIMULATION_OBJ)
+	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(SIMULATION_OBJ) $(LDFLAGS) -L. -lblockchain
 
-$(LIBRARY): $(filter-out $(TEST_OBJ), $(OBJ))
+$(LIBRARY): $(filter-out $(SIMULATION_OBJ), $(OBJ))
 	$(CC) -shared -o $@ $^ $(LDFLAGS)
 
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(TEST_DIR)/%.o: $(TEST_DIR)/%.cpp
+$(SIMULATION_DIR)/%.o: $(SIMULATION_DIR)/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(UNIT_TEST_DIR)/%.o: $(UNIT_TEST_DIR)/%.cpp
@@ -53,10 +53,13 @@ unit_tests: LDFLAGS += -lgtest -lgtest_main -lpthread $(GTEST)
 unit_tests: $(LIBRARY) $(UNIT_TEST_OBJ)
 	$(CC) $(CFLAGS) -o $(UNIT_TEST_EXEC) $(UNIT_TEST_OBJ) $(LDFLAGS) -L. -lblockchain
 
+simulation: $(LIBRARY) $(SIMULATION_OBJ)
+	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(SIMULATION_OBJ) $(LDFLAGS) -L. -lblockchain
+
 metrics: $(LIBRARY) $(METRICS_OBJ)
 	$(CC) $(CFLAGS) -o $(METRICS_EXEC) $(METRICS_OBJ) $(LDFLAGS) -L. -lblockchain
 
 clean:
-	rm -f $(OBJ) $(TEST_OBJ) $(UNIT_TEST_OBJ) $(METRICS_OBJ) $(EXECUTABLE) $(LIBRARY) $(UNIT_TEST_EXEC) $(METRICS_EXEC)
+	rm -f $(OBJ) $(SIMULATION_OBJ) $(UNIT_TEST_OBJ) $(METRICS_OBJ) $(EXECUTABLE) $(LIBRARY) $(UNIT_TEST_EXEC) $(METRICS_EXEC)
 
 re: clean all

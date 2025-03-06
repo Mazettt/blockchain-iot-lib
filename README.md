@@ -34,10 +34,16 @@ make simulation
 ./run_simulation
 ```
 
-Build and run the metrics
+Build and run the metrics:
 ```bash
 make metrics
 ./run_metrics
+```
+
+Build and run the unit tests:
+```bash
+make unit_tests
+./run_unit_tests
 ```
 
 If the shared library is not found, use the following command:

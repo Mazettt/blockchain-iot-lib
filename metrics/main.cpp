@@ -6,7 +6,10 @@
 #include <fstream>
 #include <filesystem>
 #include <thread>
-
+#include <vector>
+#include <string>
+#include <random>
+#include <cmath>
 #include <chrono>
 #include <numeric>
 #include <iomanip>
@@ -77,6 +80,20 @@ void printCurrentChain(const iotbc::Blockchain &chain) {
     }
 }
 
+size_t getMemoryUsage() {
+    std::ifstream file("/proc/self/status");
+    std::string line;
+    size_t memoryUsage = 0;
+
+    while (std::getline(file, line)) {
+        if (line.rfind("VmRSS:", 0) == 0) {  // Line starts with "VmRSS:"
+            std::sscanf(line.c_str(), "VmRSS: %zu", &memoryUsage);
+            return memoryUsage; // Memory usage in KB
+        }
+    }
+    return 0; // Failed to read memory usage
+}
+
 int main(int ac, char **av) {
     if (ac == 2 && std::string(av[1]) == "keygen") {
         iotbc::PrivateKey key = generatePseudoRandomPrivateKey();
@@ -103,6 +120,7 @@ int main(int ac, char **av) {
 
     std::vector<std::chrono::duration<double>> miningTimes;
     std::vector<std::chrono::duration<double>> verificationTimes;
+    std::vector<size_t> memoryUsageWhileRunning;
 
     for(size_t i = 0; i < blockCount; i++) {
         iotbc::Block block(chain.chain.empty() ? iotbc::NULL_HASH : chain.chain.back().blockHash());
@@ -121,6 +139,8 @@ int main(int ac, char **av) {
         auto end = std::chrono::high_resolution_clock::now();
         miningTimes.push_back(end - start);
         chain.addBlock(block);
+
+        memoryUsageWhileRunning.push_back(getMemoryUsage());
     }
 
     std::cout << "Blocks mined: " << blockCount << std::endl;
@@ -134,18 +154,38 @@ int main(int ac, char **av) {
     std::sort(miningTimes.begin(), miningTimes.end());
     std::chrono::duration<double> medianMiningTime = miningTimes[blockCount / 2];
 
+    double miningTimeSum = std::accumulate(miningTimes.begin(), miningTimes.end(), 0.0, [](double sum, const std::chrono::duration<double>& d) {
+        return sum + d.count();
+    });
+    double miningTimeMean = miningTimeSum / miningTimes.size();
+    double miningTimeSqSum = std::accumulate(miningTimes.begin(), miningTimes.end(), 0.0, [miningTimeMean](double sum, const std::chrono::duration<double>& d) {
+        return sum + (d.count() - miningTimeMean) * (d.count() - miningTimeMean);
+    });
+    double miningTimeStdDev = std::sqrt(miningTimeSqSum / miningTimes.size());
+
     std::cout << "Average mining time: " << averageMiningTime.count() * 1000 << "ms" << std::endl;
     std::cout << "Median mining time: " << medianMiningTime.count() * 1000 << "ms" << std::endl;
+    std::cout << "Mining time stddev: " << miningTimeStdDev * 1000 << "ms" << std::endl;
 
     std::chrono::duration<double> totalVerificationTime = std::accumulate(verificationTimes.begin(), verificationTimes.end(), std::chrono::duration<double>(0));
-    std::chrono::duration<double> averageVerificationTime = totalVerificationTime / (blockCount * 100);
+    std::chrono::duration<double> averageVerificationTime = totalVerificationTime / (blockCount * txPerBlock);
     std::sort(verificationTimes.begin(), verificationTimes.end());
     std::chrono::duration<double> medianVerificationTime = verificationTimes[verificationTimes.size() / 2];
+
+    double verificationTimeSum = std::accumulate(verificationTimes.begin(), verificationTimes.end(), 0.0, [](double sum, const std::chrono::duration<double>& d) {
+        return sum + d.count();
+    });
+    double verificationTimeMean = verificationTimeSum / verificationTimes.size();
+    double verificationTimeSqSum = std::accumulate(verificationTimes.begin(), verificationTimes.end(), 0.0, [verificationTimeMean](double sum, const std::chrono::duration<double>& d) {
+        return sum + (d.count() - verificationTimeMean) * (d.count() - verificationTimeMean);
+    });
+    double verificationTimeStdDev = std::sqrt(verificationTimeSqSum / verificationTimes.size());
 
     std::cout << std::endl;
 
     std::cout << "Average verification time: " << averageVerificationTime.count() * 1000 << "ms" << std::endl;
     std::cout << "Median verification time: " << medianVerificationTime.count() * 1000 << "ms" << std::endl;
+    std::cout << "Verification time stddev: " << verificationTimeStdDev * 1000 << "ms" << std::endl;
 
     size_t chainByteSize = 0;
     size_t txCount = 0;
@@ -153,6 +193,22 @@ int main(int ac, char **av) {
         chainByteSize += block.serialize().size();
         txCount += block.transactions.size();
     }
+
+    double memoryUsageMean = std::accumulate(memoryUsageWhileRunning.begin(), memoryUsageWhileRunning.end(), 0.0) / memoryUsageWhileRunning.size();
+    double memoryUsageSqSum = std::accumulate(memoryUsageWhileRunning.begin(), memoryUsageWhileRunning.end(), 0.0, [memoryUsageMean](double sum, size_t mem) {
+        return sum + (mem - memoryUsageMean) * (mem - memoryUsageMean);
+    });
+    double memoryUsageStdDev = std::sqrt(memoryUsageSqSum / memoryUsageWhileRunning.size());
+    double minMemoryUsage = *std::min_element(memoryUsageWhileRunning.begin(), memoryUsageWhileRunning.end());
+    double maxMemoryUsage = *std::max_element(memoryUsageWhileRunning.begin(), memoryUsageWhileRunning.end());
+
+    std::cout << std::endl;
+
+    std::cout << "Average memory usage: " << memoryUsageMean << "KB" << std::endl;
+    std::cout << "Memory usage stddev: " << memoryUsageStdDev << "KB" << std::endl;
+    std::cout << "Min memory usage: " << minMemoryUsage << "KB" << std::endl;
+    std::cout << "Max memory usage: " << maxMemoryUsage << "KB" << std::endl;
+
 
     std::cout << std::endl;
 
